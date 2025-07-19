@@ -15,6 +15,7 @@ const ServerEnvSchema = z.object({
   GITHUB_CLIENT_SECRET: z.string(),
   WS_PORT: z.string(),
   WS_HOST: z.string(),
+  VELLUM_API_KEY: z.string().optional(),
 });
 
 export type ServerEnvSchema = z.infer<typeof ServerEnvSchema>;

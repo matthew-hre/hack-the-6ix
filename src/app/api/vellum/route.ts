@@ -4,12 +4,14 @@ import type { Vellum } from "vellum-ai";
 import { NextResponse } from "next/server";
 import { VellumClient } from "vellum-ai";
 
+import env from "~/lib/env.server";
+
 export async function POST(req: NextRequest) {
   try {
     const { userMessage } = await req.json();
 
     const vellum = new VellumClient({
-      apiKey: process.env.VELLUM_API_KEY!,
+      apiKey: env.VELLUM_API_KEY!,
     });
 
     const request: Vellum.ExecuteWorkflowRequest = {
