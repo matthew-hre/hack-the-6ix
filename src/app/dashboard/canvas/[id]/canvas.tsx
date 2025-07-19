@@ -12,6 +12,7 @@ import type { Note } from "~/lib/db/schema";
 import { SpeechControls } from "~/components/speech-controls";
 import { Button } from "~/components/ui/button";
 import { updateCanvasNotes } from "~/lib/actions/canvas";
+import { useWebSocket } from "~/lib/hooks/use-web-socket";
 
 const GRID_SIZE = 20;
 const CANVAS_SIZE = 3000;
@@ -194,14 +195,47 @@ export default function Canvas({
   );
   const [editingNoteId, setEditingNoteId] = useState<number | null>(null);
   const [currentScale, setCurrentScale] = useState(1);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isPolling, _setIsPolling] = useState(true);
+  const [saveIndicator, setSaveIndicator] = useState<"idle" | "saving" | "saved">("idle");
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const transformRef = useRef<any>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastSavedNotesRef = useRef<Note[]>(initialNotes);
-  const pollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const clientIdRef = useRef<string>(Math.random().toString(36).substr(2, 9));
+  const saveIndicatorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const {
+    isConnected,
+    connectionState,
+    sendNotesUpdate,
+  } = useWebSocket({
+    canvasId,
+    onNotesUpdate: (updatedNotes) => {
+      if (!editingNoteId && saveIndicator !== "saving") {
+        setNotes(updatedNotes);
+        setMaxZIndex(Math.max(...updatedNotes.map(n => n.zIndex), 0));
+        lastSavedNotesRef.current = updatedNotes;
+        setSaveIndicator("saved");
+        if (saveIndicatorTimeoutRef.current) {
+          clearTimeout(saveIndicatorTimeoutRef.current);
+        }
+        saveIndicatorTimeoutRef.current = setTimeout(() => {
+          setSaveIndicator("idle");
+        }, 1000);
+      }
+    },
+    onConnected: () => {
+      // no toast needed in real-time mode
+    },
+    onDisconnected: () => {
+      // the connection indicator shows the state
+    },
+    onError: (error) => {
+      console.error("WebSocket error:", error);
+      // only show error toasts for actual errors
+      toast.error("Real-time collaboration error");
+    },
+  });
 
   const debouncedSave = useCallback(async (notesToSave: Note[]) => {
     if (saveTimeoutRef.current) {
@@ -214,21 +248,31 @@ export default function Canvas({
         return;
       }
 
-      setIsSaving(true);
+      setSaveIndicator("saving");
       try {
-        await updateCanvasNotes(canvasId, notesToSave);
+        await updateCanvasNotes(canvasId, notesToSave, clientIdRef.current);
+
+        if (isConnected) {
+          sendNotesUpdate(notesToSave);
+        }
+
         lastSavedNotesRef.current = notesToSave;
-        toast.success("Changes saved");
+
+        setSaveIndicator("saved");
+        if (saveIndicatorTimeoutRef.current) {
+          clearTimeout(saveIndicatorTimeoutRef.current);
+        }
+        saveIndicatorTimeoutRef.current = setTimeout(() => {
+          setSaveIndicator("idle");
+        }, 1500);
       }
       catch (error) {
         console.error("Failed to save changes:", error);
         toast.error("Failed to save changes. Please try again.");
+        setSaveIndicator("idle");
       }
-      finally {
-        setIsSaving(false);
-      }
-    }, 1000); // TODO: Clean this up
-  }, [canvasId]);
+    }, 500);
+  }, [canvasId, isConnected, sendNotesUpdate]);
 
   useEffect(() => {
     if (notes.length > 0) {
@@ -238,6 +282,9 @@ export default function Canvas({
     return () => {
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
+      }
+      if (saveIndicatorTimeoutRef.current) {
+        clearTimeout(saveIndicatorTimeoutRef.current);
       }
     };
   }, [notes, debouncedSave]);
@@ -341,56 +388,6 @@ export default function Canvas({
     setEditingNoteId(null);
   };
 
-  const checkForUpdates = useCallback(async () => {
-    try {
-      const response = await fetch(`/api/canvas/${canvasId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.ok) {
-        const canvasData = await response.json();
-        const serverNotes = canvasData.notes;
-
-        if (
-          JSON.stringify(serverNotes) !== JSON.stringify(lastSavedNotesRef.current)
-          && editingNoteId === null
-          && !isSaving
-        ) {
-          setNotes(serverNotes);
-          setMaxZIndex(Math.max(...serverNotes.map((n: Note) => n.zIndex), 0));
-          lastSavedNotesRef.current = serverNotes;
-          toast.info("Notes updated from server");
-        }
-      }
-    }
-    catch (error) {
-      console.error("Failed to check for updates:", error);
-    }
-  }, [canvasId, editingNoteId, isSaving]);
-
-  useEffect(() => {
-    if (!isPolling)
-      return;
-
-    const startPolling = () => {
-      pollingTimeoutRef.current = setTimeout(() => {
-        checkForUpdates();
-        startPolling();
-      }, 1000);
-    };
-
-    startPolling();
-
-    return () => {
-      if (pollingTimeoutRef.current) {
-        clearTimeout(pollingTimeoutRef.current);
-      }
-    };
-  }, [checkForUpdates, isPolling]);
-
   const addServerNote = async () => {
     try {
       const response = await fetch(`/api/canvas/${canvasId}/add-note`, {
@@ -433,36 +430,50 @@ export default function Canvas({
 
   return (
     <div className="relative h-screen w-full overflow-hidden bg-gray-100">
-      {/* Zoom Controls */}
       <ZoomControls transformRef={transformRef} />
-
-      {/* Menu Controls */}
       <MenuControls
         addNewNote={addNewNote}
         addServerNote={addServerNote}
       />
 
-      {/* Save Status Indicator */}
-      {isSaving && (
-        <div className="absolute top-4 right-16 z-40">
+      <div className="absolute top-4 left-1/2 z-40 -translate-x-1/2 transform">
+        <div
+          className={`
+            flex items-center gap-2 rounded-lg px-3 py-2 text-white shadow-lg
+            transition-colors duration-300
+            ${connectionState === "connected"
+      ? "bg-green-600"
+      : connectionState === "connecting"
+        ? "bg-yellow-600"
+        : "bg-red-600"
+    }
+          `}
+        >
           <div
             className={`
-              flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2
-              text-white shadow-lg
+              h-3 w-3 rounded-full transition-colors duration-300
+              ${saveIndicator === "saving"
+      ? "animate-pulse bg-white"
+      : saveIndicator === "saved"
+        ? "bg-emerald-200"
+        : connectionState === "connected"
+          ? "bg-green-200"
+          : connectionState === "connecting"
+            ? "animate-pulse bg-yellow-200"
+            : "bg-red-200"
+    }
             `}
-          >
-            <div
-              className={`
-                h-3 w-3 animate-spin rounded-full border-2 border-white
-                border-t-transparent
-              `}
-            />
-            <span className="text-sm">Saving...</span>
-          </div>
+          />
+          <span className="text-sm">
+            {connectionState === "connected"
+              ? "Real-time sync active"
+              : connectionState === "connecting"
+                ? "Connecting..."
+                : "Offline mode"}
+          </span>
         </div>
-      )}
+      </div>
 
-      {/* Speech Recognition Controls */}
       <SpeechControls canvasId={canvasId} />
 
       <TransformWrapper

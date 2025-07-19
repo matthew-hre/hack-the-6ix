@@ -1,6 +1,8 @@
 import { z } from "zod";
 
-const EnvSchema = z.object({
+import { tryParseEnv } from "./try-parse-env";
+
+const ServerEnvSchema = z.object({
   NODE_ENV: z.string(),
   DATABASE_URL: z.string(),
   POSTGRES_DB: z.string(),
@@ -15,15 +17,9 @@ const EnvSchema = z.object({
   WS_HOST: z.string(),
 });
 
-export type EnvSchema = z.infer<typeof EnvSchema>;
+export type ServerEnvSchema = z.infer<typeof ServerEnvSchema>;
 
-// Only validate and parse on server-side (not in browser)
-const isServer = typeof window === "undefined";
-
-if (isServer) {
-  const { tryParseEnv } = await import("./try-parse-env");
-  tryParseEnv(EnvSchema);
-}
+tryParseEnv(ServerEnvSchema);
 
 // eslint-disable-next-line node/no-process-env
-export default isServer ? EnvSchema.parse(process.env) : ({} as EnvSchema);
+export default ServerEnvSchema.parse(process.env);
