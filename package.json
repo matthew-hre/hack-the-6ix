@@ -15,18 +15,19 @@
     "dev:db": "docker-compose up db",
     "db:down": "docker-compose down",
     "db:reset": "docker-compose down && pnpm run dev:db",
-    "db:wipe": "docker-compose down -v && pnpm run dev:db && pnpm run db:push"
+    "db:wipe": "docker-compose down -v && pnpm run dev:db && pnpm run db:push",
+    "prepare": "husky"
   },
   "dependencies": {
-    "next": "15.3.2",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "zod": "^3.25.30",
-    "drizzle-orm": "latest",
     "better-auth": "latest",
+    "drizzle-orm": "latest",
+    "next": "15.3.2",
     "pg": "latest",
     "postgres": "latest",
-    "uuid": "latest"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "uuid": "latest",
+    "zod": "^3.25.30"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^4.13.2",
@@ -35,17 +36,24 @@
     "@next/eslint-plugin-next": "^15.3.4",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/pg": "latest",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "latest",
+    "drizzle-kit": "latest",
     "eslint": "^9",
     "eslint-plugin-better-tailwindcss": "^3.4.0",
     "eslint-plugin-format": "^1.0.1",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
     "tailwindcss": "^4",
-    "typescript": "^5",
-    "drizzle-kit": "latest",
-    "concurrently": "latest",
-    "@types/pg": "latest"
+    "typescript": "^5"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "pnpm lint"
+    ]
   }
 }
