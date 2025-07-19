@@ -31,6 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
+        suppressHydrationWarning
         className={`
           ${geistSans.variable}
           ${geistMono.variable}
@@ -38,7 +39,9 @@ export default function RootLayout({
         `}
       >
         {children}
-        <Toaster />
+        <Toaster
+          position="top-center"
+        />
       </body>
     </html>
   );
