@@ -1,25 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
+import { VellumClient, Vellum } from "vellum-ai";
 
 export async function POST(req: NextRequest) {
-  const { userMessage } = await req.json();
+  try {
+    const { userMessage } = await req.json();
 
-  const response = await fetch("https://api.vellum.ai/v1/workflow-executions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.VELLUM_API_KEY!}`,
-    },
-    body: JSON.stringify({
-      deploymentId: process.env.VELLUM_DEPLOYMENT!,
-      inputs: {
-        input_text: userMessage,
-      },
-    }),
-  });
+    const vellum = new VellumClient({
+      apiKey: process.env.VELLUM_API_KEY!,
+    });
 
-  const result = await response.json();
+    const request: Vellum.ExecuteWorkflowRequest = {
+      workflowDeploymentName: "test",
+      releaseTag: "LATEST",
+      inputs: [
+        {
+          type: "STRING",
+          name: "input_text", // ✅ Match your workflow input node
+          value: userMessage,
+        },
+      ],
+    };
 
-  return NextResponse.json({
-    message: result.outputs?.["final-output"],
-  });
+    const result = await vellum.executeWorkflow(request); // ✅ Correct call
+    console.log("📦 Vellum raw result:", JSON.stringify(result, null, 2));
+
+    if (result.data.state === "REJECTED") {
+      throw new Error(result.data.error?.message ?? "Workflow rejected");
+    }
+
+   const final = (result.data.outputs.find(
+  (o) => o.name === "final-output"
+) as { value: any })?.value;
+const output = final;
+return NextResponse.json({ message: output ?? "No output" });
+
+  } catch (err) {
+    console.error("💥 /api/vellum error:", err);
+    return NextResponse.json(
+      { error: "Internal Server Error", details: String(err) },
+      { status: 500 }
+    );
+  }
 }
