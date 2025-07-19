@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import Link from "next/link";
 
+import GithubSigninButton from "~/components/github-signin-button";
 import { auth } from "~/lib/auth";
 
 import MattInitBanner from "../components/matt-init-banner";
@@ -30,35 +31,7 @@ export default async function Home() {
         `}
         >
           <li className="mb-4">
-            Get started by
-            {" "}
-            <Link
-              href="/signup"
-              className={`
-                font-medium underline transition-colors
-                hover:text-[#1a1a1a]
-                dark:hover:text-[#ccc]
-              `}
-            >
-              signing up
-            </Link>
-            .
-          </li>
-          <li>
-            Or by
-            {" "}
-            <Link
-              href="/signin"
-              className={`
-                font-medium underline transition-colors
-                hover:text-[#1a1a1a]
-                dark:hover:text-[#ccc]
-              `}
-            >
-              logging in
-            </Link>
-            {" "}
-            if you already have an account.
+            <GithubSigninButton />
           </li>
           {session && (
             <li className="mt-4">

@@ -35,10 +35,10 @@ a vocally created web of ideas
 ## Order of Operations
 
 - [ ] Scaffold out a basic app
-  - [ ] Authentication (Github)
-  - [ ] DB (Postgres w/ Drizzle)
-  - [ ] Shadcn
-  - [ ] Husky + lint-staged
+  - [x] Authentication (Github)
+  - [x] DB (Postgres w/ Drizzle)
+  - [x] Shadcn
+  - [x] Husky + lint-staged
 - [ ] Create a "canvas"
   - [ ] `/dashboard` shows recent canvases, `/dashboard/[id]` shows the exact
         session

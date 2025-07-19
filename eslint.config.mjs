@@ -13,7 +13,7 @@ export default antfu(
       semi: true,
       quotes: "double",
     },
-    ignores: ["**/migrations/*", "next-env.d.ts"],
+    ignores: ["**/migrations/*", "next-env.d.ts", "**/components/ui/**/*"],
   },
   {
     plugins: {
