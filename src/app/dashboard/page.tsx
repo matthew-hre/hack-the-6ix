@@ -1,4 +1,3 @@
-import VellumChatBox from "~/components/VellumChatBox";
 import MattInitBanner from "~/components/matt-init-banner";
 
 import { headers } from "next/headers";
@@ -51,12 +50,6 @@ export default async function DashboardPage() {
         >
           Sign Out
         </button>
-      </div>
-
-      {/* 🧠 VellumChatBox section */}
-      <div className="w-full max-w-2xl mt-6">
-        <h2 className="text-xl font-semibold mb-4 text-center">Ask the AI Assistant</h2>
-        <VellumChatBox />
       </div>
     </div>
   );
