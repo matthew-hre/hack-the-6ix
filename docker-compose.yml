@@ -1,0 +1,13 @@
+services:
+  db:
+    image: postgres:16
+    container_name: hack-the-6ix-db
+    env_file:
+      - .env
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    volumes:
+      - hack-the-6ix_pgdata:/var/lib/postgresql/data
+
+volumes:
+  hack-the-6ix_pgdata:
