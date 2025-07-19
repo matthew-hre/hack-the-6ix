@@ -60,3 +60,36 @@ a vocally created web of ideas
   - [ ] Items are ranked against each other and evaluated for relevancy
   - [ ] Connections are saved in the DB
   - [ ] Connections are rendered on the canvas
+
+## Real-time Collaboration
+
+The canvas supports real-time collaboration through WebSockets. Multiple users can work on the same canvas simultaneously and see each other's changes in real-time.
+
+### WebSocket Architecture
+
+- **Standalone WebSocket Server**: Runs on port 8080 (configurable via `WS_PORT`)
+- **HTTP Communication**: Next.js server actions communicate with the WebSocket server via HTTP
+- **Real-time Updates**: Changes are instantly broadcasted to all connected clients
+- **Connection Status**: Visual indicators show connection state and collaboration status
+
+### Development Setup
+
+The WebSocket server runs automatically when you start the development server:
+
+```bash
+pnpm dev  # Starts database, WebSocket server, and Next.js
+```
+
+### Testing WebSocket Functionality
+
+```bash
+# Test the WebSocket connection and HTTP endpoints
+node scripts/test-websocket.mjs
+```
+
+### Environment Variables
+
+```bash
+WS_PORT=8080      # WebSocket server port
+WS_HOST=localhost # WebSocket server host
+```

@@ -9,6 +9,7 @@ import type { Note } from "~/lib/db/schema";
 import { auth } from "~/lib/auth";
 import { db } from "~/lib/db";
 import { canvas } from "~/lib/db/schema";
+import { wsClient } from "~/lib/websocket/client";
 
 export async function getCanvases() {
   const session = await auth.api.getSession({
@@ -197,7 +198,7 @@ export async function updateCanvas(
   }
 }
 
-export async function updateCanvasNotes(id: string, notes: Note[]) {
+export async function updateCanvasNotes(id: string, notes: Note[], clientId?: string) {
   const session = await auth.api.getSession({
     headers: await import("next/headers").then(m => m.headers()),
   });
@@ -218,6 +219,15 @@ export async function updateCanvasNotes(id: string, notes: Note[]) {
 
     if (updatedCanvas.length === 0) {
       throw new Error("Canvas not found");
+    }
+
+    // Broadcast the update to all connected clients except the sender
+    try {
+      await wsClient.broadcastNotesUpdate(id, notes, clientId);
+    }
+    catch (wsError) {
+      console.warn("Failed to broadcast WebSocket update:", wsError);
+      // Don't fail the database update if WebSocket broadcast fails
     }
 
     // Don't revalidate the current canvas page to avoid interrupting user experience

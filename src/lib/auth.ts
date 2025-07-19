@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { db } from "./db";
 import * as schema from "./db/schema";
-import env from "./env";
+import env from "./env.server";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {

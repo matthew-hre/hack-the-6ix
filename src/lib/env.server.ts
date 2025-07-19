@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { tryParseEnv } from "./try-parse-env";
 
-const EnvSchema = z.object({
+const ServerEnvSchema = z.object({
   NODE_ENV: z.string(),
   DATABASE_URL: z.string(),
   POSTGRES_DB: z.string(),
@@ -13,11 +13,14 @@ const EnvSchema = z.object({
   BETTER_AUTH_URL: z.string(),
   GITHUB_CLIENT_ID: z.string(),
   GITHUB_CLIENT_SECRET: z.string(),
+  WS_PORT: z.string(),
+  WS_HOST: z.string(),
+  VELLUM_API_KEY: z.string().optional(),
 });
 
-export type EnvSchema = z.infer<typeof EnvSchema>;
+export type ServerEnvSchema = z.infer<typeof ServerEnvSchema>;
 
-tryParseEnv(EnvSchema);
+tryParseEnv(ServerEnvSchema);
 
 // eslint-disable-next-line node/no-process-env
-export default EnvSchema.parse(process.env);
+export default ServerEnvSchema.parse(process.env);
