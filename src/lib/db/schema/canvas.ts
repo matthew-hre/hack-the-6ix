@@ -11,6 +11,13 @@ export type Note = {
   zIndex: number;
 };
 
+export type SpeechLog = {
+  id: string;
+  text: string;
+  timestamp: Date;
+  canvasId: string;
+};
+
 export const canvas = pgTable("canvas", {
   id: uuid().primaryKey().defaultRandom(),
   name: text().notNull(),
@@ -23,9 +30,29 @@ export const canvas = pgTable("canvas", {
   userId: uuid().notNull(),
 });
 
-export const canvasRelations = relations(canvas, ({ one }) => ({
+export const speechLog = pgTable("speech_log", {
+  id: uuid().primaryKey().defaultRandom(),
+  text: text().notNull(),
+  timestamp: timestamp().$defaultFn(() => /* @__PURE__ */ new Date()).notNull(),
+  canvasId: uuid().notNull(),
+  userId: uuid().notNull(),
+});
+
+export const canvasRelations = relations(canvas, ({ one, many }) => ({
   user: one(user, {
     fields: [canvas.userId],
+    references: [user.id],
+  }),
+  speechLogs: many(speechLog),
+}));
+
+export const speechLogRelations = relations(speechLog, ({ one }) => ({
+  canvas: one(canvas, {
+    fields: [speechLog.canvasId],
+    references: [canvas.id],
+  }),
+  user: one(user, {
+    fields: [speechLog.userId],
     references: [user.id],
   }),
 }));

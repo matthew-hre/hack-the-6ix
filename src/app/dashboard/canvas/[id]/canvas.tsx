@@ -9,6 +9,7 @@ import { toast } from "sonner";
 
 import type { Note } from "~/lib/db/schema";
 
+import { SpeechControls } from "~/components/speech-controls";
 import { Button } from "~/components/ui/button";
 import { updateCanvasNotes } from "~/lib/actions/canvas";
 
@@ -460,6 +461,9 @@ export default function Canvas({
           </div>
         </div>
       )}
+
+      {/* Speech Recognition Controls */}
+      <SpeechControls canvasId={canvasId} />
 
       <TransformWrapper
         ref={transformRef}
