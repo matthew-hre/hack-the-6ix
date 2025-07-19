@@ -1,17 +1,159 @@
 /* eslint-disable react-dom/no-dangerously-set-innerhtml */
 "use client";
 
-import { GripHorizontal, Plus, Trash2, ZoomIn, ZoomOut } from "lucide-react";
+import { DoorOpen, GripHorizontal, Menu, Plus, Server, Settings, Trash2, X, ZoomIn, ZoomOut } from "lucide-react";
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import { toast } from "sonner";
 
 import type { Note } from "~/lib/db/schema";
 
+import { Button } from "~/components/ui/button";
 import { updateCanvasNotes } from "~/lib/actions/canvas";
 
 const GRID_SIZE = 20;
 const CANVAS_SIZE = 3000;
+
+function ZoomControls({ transformRef }: { transformRef: any }) {
+  return (
+    <div className="absolute top-4 left-4 z-50 flex gap-2">
+      <Button
+        type="button"
+        variant="outline"
+        className="bg-background/50 h-10 rounded-full backdrop-blur-md"
+        onClick={() => transformRef.current?.zoomIn()}
+        title="Zoom in"
+      >
+        <ZoomIn className="h-5 w-5" />
+      </Button>
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => transformRef.current?.zoomOut()}
+        className="bg-background/50 h-10 rounded-full backdrop-blur-md"
+        title="Zoom out"
+      >
+        <ZoomOut className="h-5 w-5" />
+      </Button>
+      <Button
+        type="button"
+        onClick={() => transformRef.current?.resetTransform()}
+        variant="outline"
+        className="bg-background/50 h-10 rounded-full backdrop-blur-md"
+        title="Reset zoom"
+      >
+        <span className="text-sm tracking-tight">1:1</span>
+      </Button>
+    </div>
+  );
+}
+
+function MenuControls({
+  addNewNote,
+  addServerNote,
+}: {
+  addNewNote: () => void;
+  addServerNote: () => void;
+}) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    }
+
+    if (isMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMenuOpen]);
+
+  return (
+    <div className="absolute top-4 right-4 z-50" ref={menuRef}>
+      <div className="relative">
+        <Button
+          type="button"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          variant="outline"
+          className="bg-background/50 h-10 rounded-full backdrop-blur-md"
+          title="Menu"
+        >
+          {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </Button>
+
+        {isMenuOpen && (
+          <div
+            className="text-primary absolute top-12 right-0"
+          >
+            <div className="flex flex-col space-y-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  addServerNote();
+                  setIsMenuOpen(false);
+                }}
+                className="bg-background/50 h-10 rounded-full backdrop-blur-md"
+              >
+                <Server className="h-4 w-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  addNewNote();
+                  setIsMenuOpen(false);
+                }}
+                className="bg-background/50 h-10 rounded-full backdrop-blur-md"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  addNewNote();
+                  setIsMenuOpen(false);
+                }}
+                className="bg-background/50 h-10 rounded-full backdrop-blur-md"
+                asChild
+              >
+                <Link
+                  href="/dashboard"
+                  className={`
+                    bg-background/50 h-10 rounded-full backdrop-blur-md
+                  `}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <DoorOpen />
+                </Link>
+              </Button>
+
+              <Button
+                type="button"
+                disabled
+                variant="outline"
+                className={`
+                  bg-background/50 h-10 cursor-not-allowed rounded-full
+                  backdrop-blur-md
+                `}
+              >
+                <Settings className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 function parseMarkdown(markdown: string) {
   const htmlString = markdown
@@ -290,70 +432,18 @@ export default function Canvas({
 
   return (
     <div className="relative h-screen w-full overflow-hidden bg-gray-100">
-      {/* Control Panel */}
-      <div className="absolute top-4 left-4 z-50 flex gap-2">
-        <button
-          type="button"
-          onClick={() => transformRef.current?.zoomIn()}
-          className={`
-            flex h-10 w-10 items-center justify-center rounded-lg bg-white
-            shadow-lg
-            hover:bg-gray-50
-          `}
-        >
-          <ZoomIn className="h-5 w-5" />
-        </button>
-        <button
-          type="button"
-          onClick={() => transformRef.current?.zoomOut()}
-          className={`
-            flex h-10 w-10 items-center justify-center rounded-lg bg-white
-            shadow-lg
-            hover:bg-gray-50
-          `}
-        >
-          <ZoomOut className="h-5 w-5" />
-        </button>
-        <button
-          type="button"
-          onClick={() => transformRef.current?.resetTransform()}
-          className={`
-            flex h-10 w-10 items-center justify-center rounded-lg bg-white
-            shadow-lg
-            hover:bg-gray-50
-          `}
-        >
-          <span className="text-sm font-semibold">1:1</span>
-        </button>
-        <button
-          type="button"
-          onClick={addNewNote}
-          className={`
-            flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600
-            text-white shadow-lg
-            hover:bg-blue-700
-          `}
-          title="Add new note"
-        >
-          <Plus className="h-5 w-5" />
-        </button>
-        <button
-          type="button"
-          onClick={addServerNote}
-          className={`
-            flex h-auto items-center justify-center rounded-lg bg-green-600 px-3
-            py-2 text-white shadow-lg
-            hover:bg-green-700
-          `}
-          title="Test server-side note creation"
-        >
-          <span className="text-sm font-semibold">Server Test</span>
-        </button>
-      </div>
+      {/* Zoom Controls */}
+      <ZoomControls transformRef={transformRef} />
+
+      {/* Menu Controls */}
+      <MenuControls
+        addNewNote={addNewNote}
+        addServerNote={addServerNote}
+      />
 
       {/* Save Status Indicator */}
       {isSaving && (
-        <div className="absolute top-4 right-4 z-50">
+        <div className="absolute top-4 right-16 z-40">
           <div
             className={`
               flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2

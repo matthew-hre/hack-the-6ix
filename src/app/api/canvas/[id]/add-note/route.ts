@@ -5,6 +5,7 @@ import type { Note } from "~/lib/db/schema";
 import { getCanvas, updateCanvasNotes } from "~/lib/actions/canvas";
 
 export async function POST(
+  request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
