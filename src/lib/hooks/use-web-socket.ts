@@ -1,5 +1,4 @@
 /* eslint-disable ts/no-use-before-define */
-/* eslint-disable react-hooks-extra/no-direct-set-state-in-use-effect */
 /* eslint-disable no-console */
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -72,6 +71,7 @@ export function useWebSocket({
         ? `wss://${window.location.host}/ws`
         : `ws://localhost:8080`;
 
+      console.log("Attempting to connect to WebSocket:", wsUrl);
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
@@ -120,19 +120,27 @@ export function useWebSocket({
       };
 
       ws.onclose = (event) => {
-        console.log("WebSocket disconnected:", event.code, event.reason);
+        console.log("WebSocket disconnected:", event.code, event.reason, event.wasClean);
         isConnectingRef.current = false;
         setIsConnected(false);
         setConnectionState("disconnected");
         onDisconnectedRef.current?.();
 
+        // Only reconnect for unexpected closures (not manual disconnects)
         if (event.code !== 1000 && reconnectAttemptsRef.current < maxReconnectAttempts) {
+          console.log("Unexpected WebSocket closure, scheduling reconnect...");
           scheduleReconnect();
+        }
+        else if (event.code !== 1000) {
+          console.log("Max reconnection attempts reached or manual disconnect");
         }
       };
 
       ws.onerror = (error) => {
-        console.error("WebSocket error:", error);
+        const errorMessage = error instanceof ErrorEvent
+          ? error.message
+          : error.type || "Unknown WebSocket error";
+        console.error("WebSocket error:", errorMessage, error);
         isConnectingRef.current = false;
         setConnectionState("error");
         onErrorRef.current?.(error);
@@ -200,9 +208,13 @@ export function useWebSocket({
   }, [canvasId]);
 
   useEffect(() => {
-    connect();
+    // Add a small delay to ensure component is fully mounted before connecting
+    const connectTimer = setTimeout(() => {
+      connect();
+    }, 100);
 
     return () => {
+      clearTimeout(connectTimer);
       disconnect();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps

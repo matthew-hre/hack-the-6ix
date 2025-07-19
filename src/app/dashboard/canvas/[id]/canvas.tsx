@@ -120,10 +120,6 @@ function MenuControls({
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => {
-                  addNewNote();
-                  setIsMenuOpen(false);
-                }}
                 className="bg-background/50 h-10 rounded-full backdrop-blur-md"
                 asChild
               >
@@ -231,9 +227,14 @@ export default function Canvas({
       // the connection indicator shows the state
     },
     onError: (error) => {
-      console.error("WebSocket error:", error);
-      // only show error toasts for actual errors
-      toast.error("Real-time collaboration error");
+      const errorMessage = error instanceof ErrorEvent
+        ? error.message
+        : "WebSocket connection failed";
+      console.error("WebSocket error:", errorMessage, error);
+      // Only show error toasts for actual connection failures
+      if (errorMessage !== "WebSocket connection failed") {
+        toast.error(`Real-time collaboration error: ${errorMessage}`);
+      }
     },
   });
 
