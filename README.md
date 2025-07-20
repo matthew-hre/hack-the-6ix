@@ -123,7 +123,7 @@ Note: {
 
    ```bash
    git clone https://github.com/matthew-hre/hack-the-6ix.git
-   ```  
+   ```
 
 2. Install dependencies:
 
@@ -131,11 +131,11 @@ Note: {
     cd hack-the-6ix
     nix develop
     pnpm i
-    ```
+   ```
 
 3. Set up environment variables:
 
-```bash
+````bash
     cp .env.example .env
     ```
 
@@ -148,3 +148,4 @@ Note: {
     ```bash
     pnpm db:push
     ```
+````

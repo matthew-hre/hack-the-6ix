@@ -228,9 +228,10 @@ export function SpeechControls({ canvasId, currentNotes }: SpeechControlsProps) 
               const pushUpOffset = currentTranscriptHeight + (distanceFromBottom * baseSpacing);
 
               const opacities = [100, 50, 25];
-              const opacity = opacities[distanceFromBottom] ?? 10;
+              const opacity = opacities[distanceFromBottom] ?? 0;
               const backgroundOpacityClassname = `bg-background/${opacity}`;
               const foregroundOpacityClassname = `text-foreground/${opacity}`;
+              const hide = distanceFromBottom > 2 ? "hidden" : "";
 
               return (
                 <div
@@ -238,6 +239,7 @@ export function SpeechControls({ canvasId, currentNotes }: SpeechControlsProps) 
                   className={`
                     ${backgroundOpacityClassname}
                     ${foregroundOpacityClassname}
+                    ${hide}
                     border-border rounded-lg border p-3 text-sm leading-relaxed
                     shadow-lg backdrop-blur-md transition-all duration-300
                     ease-out
