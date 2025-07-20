@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import CreateCanvasForm from "~/components/create-canvas-form";
 import DeleteCanvasButton from "~/components/delete-canvas-button";
+import LogoutButton from "~/components/logout-button";
 import { Button } from "~/components/ui/button";
 import { getCanvases } from "~/lib/actions/canvas";
 
@@ -38,7 +39,10 @@ export default async function Dashboard() {
               Manage your canvases and projects
             </p>
           </div>
-          <CreateCanvasForm />
+          <div className="gap-4 flex flex-row">
+            <CreateCanvasForm />
+            <LogoutButton />
+          </div>
         </div>
 
         {canvases.length === 0
