@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import type { Note } from "~/lib/db/schema";
 
 import { getCanvas, updateCanvasNotes } from "~/lib/actions/canvas";
+import { findOptimalNotePosition, getNextNoteId } from "~/lib/utils/note-placement";
 
 export async function POST(
   request: Request,
@@ -13,17 +14,16 @@ export async function POST(
 
     const currentCanvas = await getCanvas(id);
 
-    const existingIds = currentCanvas.notes.map(note => note.id);
-    const newId = Math.max(...existingIds, 0) + 1;
+    const newId = getNextNoteId(currentCanvas.notes);
+    const position = findOptimalNotePosition(currentCanvas.notes);
+
+    const randomSize = () => Math.floor(Math.random() * 6) + 15; // 15-20 inclusive
 
     const serverNote: Note = {
       id: newId,
       content: `# Server Note ${newId}\n\nThis note was created from the server at ${new Date().toLocaleTimeString()}!\n\n**This demonstrates server-side updates.**`,
-      position: {
-        x: Math.floor(Math.random() * 100) + 50,
-        y: Math.floor(Math.random() * 100) + 50,
-      },
-      size: { width: 20, height: 15 },
+      position,
+      size: { width: randomSize(), height: randomSize() },
       zIndex: Math.max(...currentCanvas.notes.map(n => n.zIndex), 0) + 1,
     };
 

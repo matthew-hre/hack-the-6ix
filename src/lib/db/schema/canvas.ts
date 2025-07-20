@@ -1,4 +1,4 @@
-import { integer, json, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { foreignKey, integer, json, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm/relations";
 
 import { user } from "./auth";
@@ -36,7 +36,18 @@ export const speechLog = pgTable("speech_log", {
   timestamp: timestamp().$defaultFn(() => /* @__PURE__ */ new Date()).notNull(),
   canvasId: uuid().notNull(),
   userId: uuid().notNull(),
-});
+}, table => ({
+  canvasFk: foreignKey({
+    columns: [table.canvasId],
+    foreignColumns: [canvas.id],
+    name: "speech_log_canvas_id_fk",
+  }).onDelete("cascade"),
+  userFk: foreignKey({
+    columns: [table.userId],
+    foreignColumns: [user.id],
+    name: "speech_log_user_id_fk",
+  }).onDelete("cascade"),
+}));
 
 export const canvasRelations = relations(canvas, ({ one, many }) => ({
   user: one(user, {

@@ -56,6 +56,36 @@ export function SpeechControls({ canvasId }: SpeechControlsProps) {
     }
   }, [canvasId]);
 
+  const processTranscriptsToNotes = useCallback(async (transcripts: SpeechLine[]) => {
+    if (transcripts.length === 0) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/canvas/${canvasId}/process-transcripts`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ transcripts }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.createdNotes && result.createdNotes.length > 0) {
+          toast.success(`Created ${result.createdNotes.length} notes from speech`);
+        }
+      }
+      else {
+        const error = await response.json();
+        console.error("Failed to process transcripts:", error);
+      }
+    }
+    catch (error) {
+      console.error("Failed to process transcripts:", error);
+    }
+  }, [canvasId]);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       // this is bad. need it to dodge hydration mismatch
@@ -89,11 +119,18 @@ export function SpeechControls({ canvasId }: SpeechControlsProps) {
       };
 
       const newLines = [...prev, newLine];
-      return newLines.slice(-3);
+      const updatedLines = newLines.slice(-3);
+
+      // Automatically process the most recent 3 transcripts after adding a new line
+      setTimeout(() => {
+        processTranscriptsToNotes(updatedLines.slice(-3));
+      }, 100);
+
+      return updatedLines;
     });
 
     logSpeechToServer(trimmedText);
-  }, [logSpeechToServer]);
+  }, [logSpeechToServer, processTranscriptsToNotes]);
 
   useEffect(() => {
     if (transcript && transcript !== lastTranscriptRef.current) {
