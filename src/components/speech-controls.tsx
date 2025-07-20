@@ -119,14 +119,12 @@ export function SpeechControls({ canvasId }: SpeechControlsProps) {
       };
 
       const newLines = [...prev, newLine];
-      const updatedLines = newLines.slice(-3);
 
-      // Automatically process the most recent 3 transcripts after adding a new line
       setTimeout(() => {
-        processTranscriptsToNotes(updatedLines.slice(-3));
+        processTranscriptsToNotes(newLines);
       }, 100);
 
-      return updatedLines;
+      return newLines;
     });
 
     logSpeechToServer(trimmedText);

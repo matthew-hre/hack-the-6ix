@@ -16,6 +16,7 @@ const ServerEnvSchema = z.object({
   WS_PORT: z.string(),
   WS_HOST: z.string(),
   VELLUM_API_KEY: z.string().optional(),
+  OPENAI_API_KEY: z.string(),
 });
 
 export type ServerEnvSchema = z.infer<typeof ServerEnvSchema>;
