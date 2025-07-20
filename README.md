@@ -1,69 +1,112 @@
-# WIP: Spider
+# ARACHNID
 
-a vocally created web of ideas
+Weave mindmaps with nothing but your voice.
+
+> Created in 36 hours for Hack the 6ix 2025.
+
+## Overview
+
+ARACHNID is a voice-powered mindmapping application that allows users to create visual knowledge maps through speech. Users can speak their ideas and watch as they're transformed into interactive notes on a collaborative canvas.
 
 ## Features
 
-- Create a "session"
-- Begin speaking: content is transcribed live
-- Speakers are identified via Real Time Diarization
-- Content is parsed: "problems" and "solutions"
-- Content is visual: items appear on the screen and are maluable
-- Content is connected: associated problems / solutions are connected via edges
-- Sessions are saved and loaded at will
+### Voice-Powered Interface
 
-## App Flow
+- **Real-time speech recognition** using Web Speech API
+- **Live transcription** with automatic speech logging
+- **Voice-to-note conversion** powered by AI
+- **Continuous listening** with smart pause detection
 
-1. A session is created
-2. Transcription is enabled. A dotgrid background is visible, with a floating
-   menu for audio settings in the bottom-left, and the live conversation being
-   transcribed in the bottom-right
-3. As conversations are spoken, "Chunks" of that conversation are being sent to
-   our backend, responsible for handling all our data processing (for this doc,
-   we will refer to it as "The Model")
-4. The Model parses out the provided Chunk and sees if anything inside it is a
-   question or a solution
-5. If it's a question, it verifies it does not exist in the document, and if so,
-   adds it. If it does exist, it adds any addition, not-already-present
-   information.
-6. If it's a solution, the Model discerns whether the question exists or not. If
-   it does, it adds any additional detail. If it does not, it adds it.
-7. Every few seconds, poll each question in the document against all the
-   solutions in the dashboard, and look for possible connections (via Cohere
-   Rerank). If it's relevant, draw a labelled connection.
+### Interactive Canvas
 
-## Order of Operations
+- **Infinite zoomable canvas** with smooth zoom controls
+- **Draggable and resizable notes** with automatic positioning
+- **Real-time collaboration** via WebSockets
+- **Grid-based layout** for organized visual structure
 
-- [ ] Scaffold out a basic app
-  - [x] Authentication (Github)
-  - [x] DB (Postgres w/ Drizzle)
-  - [x] Shadcn
-  - [x] Husky + lint-staged
-- [ ] Create a "canvas"
-  - [ ] `/dashboard` shows recent canvases, `/dashboard/[id]` shows the exact
-        session
-  - [ ] Create "items" on the canvas
-  - [ ] Items can be "problems" or "solutions"
-  - [ ] Items are draggable and droppable
-  - [ ] Items can be editable via text content
-- [ ] Diarization
-  - [ ] Hook up Azure RTD for speaker identification and transcription
-  - [ ] Start recording audio via front-end
-  - [ ] Transcribed audio displayed back to front-end
-- [ ] Data Parsing
-  - [ ] Transcribed chunks sent to Vellum
-  - [ ] Vellum discerns between problems and solutions
-  - [ ] Vellum checks existing data for detected problem / solution
-    - [ ] Existing items are updated with additional information
-    - [ ] New items are created and added to the board
-- [ ] Connections
-  - [ ] Items are ranked against each other and evaluated for relevancy
-  - [ ] Connections are saved in the DB
-  - [ ] Connections are rendered on the canvas
+### AI-Powered Processing
 
-## Real-time Collaboration
+- **OpenAI GPT integration** for intelligent note creation and updates
+- **Smart note merging** - updates existing notes with new information
+- **Automatic content analysis** and note generation
 
-The canvas supports real-time collaboration through WebSockets. Multiple users can work on the same canvas simultaneously and see each other's changes in real-time.
+### Authentication & Data
+
+- **GitHub OAuth integration** via Better Auth
+- **PostgreSQL database** with Drizzle ORM
+- **User session management** and secure API routes
+- **Canvas and speech log persistence**
+
+## Tech Stack
+
+This project was originally scaffolded with [matt-init](https://github.com/matthew-hre/matt-init).
+
+### Frontend
+
+- **Next.js 15** with React 19 and TypeScript
+- **Tailwind CSS** with custom design system
+- **Shadcn/ui** components with Radix UI primitives
+- **React Zoom Pan Pinch** for canvas interactions
+- **React Speech Recognition** for voice input
+- **Custom fonts** (HealTheWeb typeface)
+
+### Backend
+
+- **Next.js App Router** with Server Actions
+- **PostgreSQL** database with Docker Compose
+- **Drizzle ORM** for type-safe database operations
+- **Better Auth** for authentication
+- **WebSocket server** for real-time collaboration
+
+### AI & External Services
+
+- **OpenAI GPT** for natural language processing
+- **Web Speech API** for browser-native speech recognition
+
+### Development Tools
+
+- **TypeScript** for type safety
+- **ESLint** with Antfu config
+- **Husky + lint-staged** for pre-commit hooks
+- **pnpm** for package management
+- **Docker Compose** for database management
+
+## Architecture
+
+### Database Schema
+
+```typescript
+// Canvas table stores mindmap sessions
+canvas: {
+  id: uuid (primary key)
+  name: string
+  description?: string
+  width: number (default: 3000)
+  height: number (default: 3000)
+  notes: Note[] (JSON array)
+  createdAt: timestamp
+  updatedAt: timestamp
+  userId: uuid (foreign key)
+}
+
+// Speech logs track all voice interactions
+speechLog: {
+  id: uuid (primary key)
+  text: string
+  timestamp: timestamp
+  canvasId: uuid (foreign key)
+  userId: uuid (foreign key)
+}
+
+// Notes structure within canvas
+Note: {
+  id: number
+  content: string
+  position: { x: number, y: number }
+  size: { width: number, height: number }
+  zIndex: number
+}
+```
 
 ### WebSocket Architecture
 
@@ -72,24 +115,36 @@ The canvas supports real-time collaboration through WebSockets. Multiple users c
 - **Real-time Updates**: Changes are instantly broadcasted to all connected clients
 - **Connection Status**: Visual indicators show connection state and collaboration status
 
-### Development Setup
+## Development
 
-The WebSocket server runs automatically when you start the development server:
+### Getting Started
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/matthew-hre/hack-the-6ix.git
+   ```  
+
+2. Install dependencies:
+
+   ```bash
+    cd hack-the-6ix
+    nix develop
+    pnpm i
+    ```
+
+3. Set up environment variables:
 
 ```bash
-pnpm dev  # Starts database, WebSocket server, and Next.js
-```
+    cp .env.example .env
+    ```
 
-### Testing WebSocket Functionality
+4. Start the development server:
+    ```bash
+    pnpm dev
+    ```
 
-```bash
-# Test the WebSocket connection and HTTP endpoints
-node scripts/test-websocket.mjs
-```
-
-### Environment Variables
-
-```bash
-WS_PORT=8080      # WebSocket server port
-WS_HOST=localhost # WebSocket server host
-```
+5. Run an initial DB migration:
+    ```bash
+    pnpm db:push
+    ```
