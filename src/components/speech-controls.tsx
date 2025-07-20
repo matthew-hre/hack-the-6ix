@@ -5,10 +5,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 import { toast } from "sonner";
 
+import type { Note } from "~/lib/db/schema";
+
 import { Button } from "~/components/ui/button";
 
 type SpeechControlsProps = {
   canvasId: string;
+  currentNotes?: Note[];
 };
 
 type SpeechLine = {
@@ -19,7 +22,7 @@ type SpeechLine = {
 
 const SPEECH_TIMEOUT_MS = 1500; // 1.5 seconds
 
-export function SpeechControls({ canvasId }: SpeechControlsProps) {
+export function SpeechControls({ canvasId, currentNotes }: SpeechControlsProps) {
   const [speechLines, setSpeechLines] = useState<SpeechLine[]>([]);
   const [isMuted, setIsMuted] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -67,7 +70,10 @@ export function SpeechControls({ canvasId }: SpeechControlsProps) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ transcripts }),
+        body: JSON.stringify({
+          transcripts,
+          currentNotes: currentNotes || [],
+        }),
       });
 
       if (response.ok) {
@@ -84,7 +90,7 @@ export function SpeechControls({ canvasId }: SpeechControlsProps) {
     catch (error) {
       console.error("Failed to process transcripts:", error);
     }
-  }, [canvasId]);
+  }, [canvasId, currentNotes]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
