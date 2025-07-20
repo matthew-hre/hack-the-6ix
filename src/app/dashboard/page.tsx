@@ -1,6 +1,6 @@
 import { Calendar, Clock } from "lucide-react";
 import Link from "next/link";
-
+import {auth} from "~/lib/auth";
 import CreateCanvasForm from "~/components/create-canvas-form";
 import DeleteCanvasButton from "~/components/delete-canvas-button";
 import { Button } from "~/components/ui/button";

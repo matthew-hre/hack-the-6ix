@@ -15,6 +15,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
+import SignOutButton from "./sign-out-button";
 import { createCanvas } from "~/lib/actions/canvas";
 
 type CreateCanvasFormProps = {
@@ -55,6 +56,7 @@ export default function CreateCanvasFormClient({ onCanvasCreated }: CreateCanvas
   }
 
   return (
+    <div className="flex gap-4 mb-6">
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button>Create New Canvas</Button>
@@ -131,6 +133,8 @@ export default function CreateCanvasFormClient({ onCanvasCreated }: CreateCanvas
           </div>
         </form>
       </DialogContent>
+          <SignOutButton />
     </Dialog>
+    </div>
   );
 }
