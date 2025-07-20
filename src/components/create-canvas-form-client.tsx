@@ -1,7 +1,7 @@
 "use client";
 
 import { redirect } from "next/navigation";
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "~/components/ui/button";
@@ -39,20 +39,28 @@ async function createCanvasAction(
 export default function CreateCanvasFormClient({ onCanvasCreated }: CreateCanvasFormProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [state, formAction, isPending] = useActionState(createCanvasAction, null);
+  const processedStateRef = useRef<{ success?: boolean; error?: string } | null>(null);
 
-  // Handle successful canvas creation
-  if (state?.success && "canvas" in state) {
-    const canvas = state.canvas;
-    setIsOpen(false);
-    toast.success(`Canvas "${canvas.name}" created successfully!`);
-    onCanvasCreated?.();
-    redirect(`/dashboard/canvas/${canvas.id}`);
-  }
+  // Handle successful canvas creation and errors with useEffect
+  useEffect(() => {
+    // Avoid processing the same state multiple times
+    if (state === processedStateRef.current)
+      return;
 
-  // Handle error
-  if (state?.error) {
-    toast.error(state.error);
-  }
+    if (state?.success && "canvas" in state) {
+      const canvas = state.canvas;
+      processedStateRef.current = state;
+      setIsOpen(false);
+      toast.success(`Canvas "${canvas.name}" created successfully!`);
+      onCanvasCreated?.();
+      redirect(`/dashboard/canvas/${canvas.id}`);
+    }
+
+    if (state?.error) {
+      processedStateRef.current = state;
+      toast.error(state.error);
+    }
+  }, [state, onCanvasCreated]);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
