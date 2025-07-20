@@ -65,7 +65,11 @@ export default function CreateCanvasFormClient({ onCanvasCreated }: CreateCanvas
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button>Create New Canvas</Button>
+        <Button
+          size="lg"
+        >
+          Create New Canvas
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>

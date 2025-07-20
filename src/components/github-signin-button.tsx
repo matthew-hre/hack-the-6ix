@@ -30,6 +30,7 @@ export default function GithubSigninButton() {
       <Button
         type="submit"
         variant="outline"
+        size="lg"
       >
         <Github className="mr-2 h-5 w-5" />
         Sign In with Github

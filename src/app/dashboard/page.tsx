@@ -1,4 +1,3 @@
-import { Calendar, Clock } from "lucide-react";
 import Link from "next/link";
 
 import CreateCanvasForm from "~/components/create-canvas-form";
@@ -22,40 +21,63 @@ export default async function Dashboard() {
   const mostRecentCanvas = canvases[0];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="bg-muted min-h-screen p-6">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="mt-1 text-gray-600">Manage your canvases and projects</p>
+            <h1 className={`
+              text-foreground font-heal-the-web-b text-4xl font-bold
+            `}
+            >
+              Dashboard
+            </h1>
+            <p className={`
+              text-muted-foreground font-heal-the-web-a mt-1 text-lg
+            `}
+            >
+              Manage your canvases and projects
+            </p>
           </div>
           <CreateCanvasForm />
         </div>
 
         {canvases.length === 0
           ? (
-              <div className="py-12 text-center">
-                <h2 className="mb-2 text-xl font-semibold text-gray-700">No canvases yet</h2>
+              <div className={`
+                border-muted-foreground border border-dashed py-12 text-center
+              `}
+              >
+                <h2 className={`
+                  text-foreground font-heal-the-web-a mb-2 text-2xl
+                  font-semibold
+                `}
+                >
+                  No canvases yet
+                </h2>
                 <p className="mb-4 text-gray-500">Create your first canvas to get started</p>
                 <CreateCanvasForm />
               </div>
             )
           : (
               <div className="space-y-8">
-                {/* Quick Access to Most Recent Canvas */}
                 {mostRecentCanvas && (
                   <div
                     className={`
-                      border-muted-foreground rounded-md border border-dashed
-                      bg-white p-6
+                      border-muted-foreground bg-background border border-dashed
+                      p-6
                     `}
                   >
                     <div className="mb-3 flex items-center gap-2">
-                      <Clock className="h-5 w-5 text-black" />
-                      <h2 className="text-lg font-semibold text-black">Continue Working</h2>
+                      <h2 className={`
+                        text-foreground font-heal-the-web-a text-lg
+                        font-semibold
+                      `}
+                      >
+                        Continue Working
+                      </h2>
                     </div>
                     <div
-                      className="rounded-lg border border-gray-200 bg-white p-4"
+                      className="p-4"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
@@ -101,12 +123,15 @@ export default async function Dashboard() {
                   </div>
                 )}
 
-                {/* All Canvases */}
                 <div>
                   <div className="mb-4 flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-gray-600" />
-                    <h2 className="text-lg font-semibold text-gray-900">All Canvases</h2>
-                    <span className="text-sm text-gray-500">
+                    <h2 className={`
+                      text-foreground font-heal-the-web-a text-lg font-semibold
+                    `}
+                    >
+                      All Canvases
+                    </h2>
+                    <span className="text-muted-foreground text-sm">
                       (
                       {canvases.length}
                       )
@@ -123,22 +148,22 @@ export default async function Dashboard() {
                       <div
                         key={canvas.id}
                         className={`
-                          rounded-lg border border-gray-200 bg-white p-4
-                          transition-shadow
+                          border-muted-foreground bg-background border
+                          border-dashed p-4 transition-shadow
                           hover:shadow-md
                         `}
                       >
                         <div className="mb-3 flex items-start justify-between">
                           <div className="flex-1">
                             <h3 className={`
-                              truncate font-semibold text-gray-900
+                              text-foreground truncate font-semibold
                             `}
                             >
                               {canvas.name}
                             </h3>
                             {canvas.description && (
                               <p className={`
-                                mt-1 line-clamp-2 text-sm text-gray-600
+                                text-muted-foreground mt-1 line-clamp-2 text-sm
                               `}
                               >
                                 {canvas.description}
@@ -150,8 +175,8 @@ export default async function Dashboard() {
 
                         <div className="mb-4 space-y-2">
                           <div className={`
-                            flex items-center justify-between text-sm
-                            text-gray-500
+                            text-muted-foreground flex items-center
+                            justify-between text-sm
                           `}
                           >
                             <span>
@@ -167,13 +192,13 @@ export default async function Dashboard() {
                               notes
                             </span>
                           </div>
-                          <div className="text-xs text-gray-400">
+                          <div className="text-muted-foreground text-xs">
                             Created
                             {" "}
                             {formatDate(canvas.createdAt)}
                           </div>
                           {canvas.updatedAt !== canvas.createdAt && (
-                            <div className="text-xs text-gray-400">
+                            <div className="text-muted-foreground text-xs">
                               Updated
                               {" "}
                               {formatDate(canvas.updatedAt)}
@@ -182,10 +207,10 @@ export default async function Dashboard() {
                         </div>
 
                         <Link href={`/dashboard/canvas/${canvas.id}`}>
-                          <Button className={`
-                            w-full bg-gray-100 text-gray-700
-                            hover:bg-gray-200
-                          `}
+                          <Button
+                            size="lg"
+                            variant="secondary"
+                            className="w-full"
                           >
                             Open Canvas
                           </Button>
