@@ -42,7 +42,7 @@ export async function POST(
     }
 
     const { id: canvasId } = await params;
-    const { transcripts } = await request.json();
+    const { transcripts, currentNotes } = await request.json();
 
     if (!transcripts || !Array.isArray(transcripts)) {
       return NextResponse.json(
@@ -51,11 +51,20 @@ export async function POST(
       );
     }
 
-    // Get current canvas data
-    const currentCanvas = await getCanvas(canvasId);
-    const updatedNotes = [...currentCanvas.notes];
-    let maxZIndex = Math.max(...currentCanvas.notes.map(n => n.zIndex), 0);
-    let maxId = Math.max(...currentCanvas.notes.map(n => n.id), 0);
+    // Use current frontend notes if provided, otherwise get from database
+    let notesToUse: Note[];
+    if (currentNotes && Array.isArray(currentNotes)) {
+      notesToUse = currentNotes;
+    }
+    else {
+      // Fallback to database if currentNotes not provided (for backward compatibility)
+      const currentCanvas = await getCanvas(canvasId);
+      notesToUse = currentCanvas.notes;
+    }
+
+    const updatedNotes = [...notesToUse];
+    let maxZIndex = Math.max(...notesToUse.map((n: Note) => n.zIndex), 0);
+    let maxId = Math.max(...notesToUse.map((n: Note) => n.id), 0);
 
     const newNotes: Note[] = [];
 

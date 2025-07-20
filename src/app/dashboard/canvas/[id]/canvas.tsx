@@ -472,7 +472,7 @@ export default function Canvas({
         </div>
       </div>
 
-      <SpeechControls canvasId={canvasId} />
+      <SpeechControls canvasId={canvasId} currentNotes={notes} />
 
       <TransformWrapper
         ref={transformRef}
