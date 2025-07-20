@@ -135,7 +135,7 @@ Note: {
 
 3. Set up environment variables:
 
-````bash
+```bash
     cp .env.example .env
     ```
 
@@ -148,4 +148,3 @@ Note: {
     ```bash
     pnpm db:push
     ```
-````
