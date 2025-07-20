@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 
 import "./globals.css";
 import { Toaster } from "~/components/ui/sonner";
@@ -13,6 +14,18 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const healTheWebA = localFont({
+  src: "../public/fonts/HealTheWebA-Regular.otf",
+  variable: "--font-heal-the-web-a",
+  display: "swap",
+});
+
+const healTheWebB = localFont({
+  src: "../public/fonts/HealTheWebB-Regular.otf",
+  variable: "--font-heal-the-web-b",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -35,6 +48,8 @@ export default function RootLayout({
         className={`
           ${geistSans.variable}
           ${geistMono.variable}
+          ${healTheWebA.variable}
+          ${healTheWebB.variable}
           antialiased
         `}
       >
