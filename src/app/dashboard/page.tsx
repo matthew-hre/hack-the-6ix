@@ -39,7 +39,7 @@ export default async function Dashboard() {
               Manage your canvases and projects
             </p>
           </div>
-          <div className="gap-4 flex flex-row">
+          <div className="flex flex-row gap-4">
             <CreateCanvasForm />
             <LogoutButton />
           </div>

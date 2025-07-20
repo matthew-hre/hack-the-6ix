@@ -71,7 +71,11 @@ export async function POST(
     const prompt = `
     The following data is from "Arachnid", a platform that listens to brainstorming / ideation sessions, and creates a visual mind-map of the topics discussed during the session. This form factor is best described as a "wall of sticky notes". Primarily, this tool is used for software development brainstorming.
 
-Your job is to transform transcripts of these ideation sessions into nicely formatted and structured notes for this mind-map. Additionally, you can update existing notes, only if the update introduces new information. Finally, you can break notes into multiple notes if they are too long or contain multiple ideas.
+Your job is to perform any of the following actions:
+
+1. Create new notes based on the provided transcripts. If the transcripts contain new information that is not already captured in the existing notes, create a new note with that information. An example of this is a new problem or solution that has not been documented yet.
+2. Update existing notes with new information from the transcripts, but only if the update introduces new information that is not already captured in the existing notes. An example of this is a new solution to an existing problem, or a new detail about a problem that has not been documented yet.
+3. Break long notes into multiple shorter notes. If a note can be split into multiple notes, do so to improve readability and structure. An example of this is a note that contains multiple problems or solutions that can be separated into distinct notes. This is incredibly important.
 
 Your job is NOT to provide solutions or suggestions. You should only use content provided from the transcripts and existing notes to create or update notes. You are a note taker, not a problem solver.
 
@@ -125,6 +129,47 @@ There is a conversation regarding logs in production, and possible ways to mitig
 \`\`\`
 
 In this case, "updates" contains a single object with both an id and content. If an existing note is to be updated, the object should include an id. If a new note is to be created, it should be included in a "newNotes" array, and no id should be provided.
+
+Another example to illustrate the splitting of notes:
+
+\`\`\`
+// INPUT
+{
+  "transcripts": [
+    {
+      "id": "a1b2c3d4",
+      "text": "we could build a real‑time chat app with AI moderation",
+      "timestamp": "2025-07-20 10:00:00"
+    },
+    {
+      "id": "e5f6g7h8",
+      "text": "also maybe we could do a collaborative code editor for dev pairs",
+      "timestamp": "2025-07-20 10:01:00"
+    }
+  ],
+  "canvasNotes": [
+    {
+      "id": 1,
+      "content": "# Idea\n\nBuild a real-time chat app with AI moderation"
+    }
+  ]
+}
+\`\`\`
+
+\`\`\`
+// OUTPUT
+{
+  "newNotes": [
+    {
+      "content": "# Idea\n\nCollaborative code editor for real-time pair programming"
+    }
+  ]
+}
+\`\`\`
+    
+- We leave note 1 as-is (it already captures the chat-app idea).
+
+- We create a new note for the second idea instead of tacking it onto note 1.
 
 Markdown is enabled, and headings are encouraged. Notes should be short, informative, and to the point. Avoid long paragraphs or excessive detail. Use headings to structure the content clearly.
 `;
