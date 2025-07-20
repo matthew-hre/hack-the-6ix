@@ -86,8 +86,8 @@ export async function createCanvas(formData: FormData) {
       {
         id: 1,
         content: "# Welcome to your canvas!\n\nDouble click to edit this note.",
-        position: { x: Math.floor(width / 40) - 10, y: Math.floor(height / 40) - 10 },
-        size: { width: 20, height: 15 },
+        position: { x: 65, y: 65 }, // Center of 150x150 grid (3000px/20px grid size)
+        size: { width: 20, height: 20 },
         zIndex: 1,
       },
     ];

@@ -13,6 +13,7 @@ import { SpeechControls } from "~/components/speech-controls";
 import { Button } from "~/components/ui/button";
 import { updateCanvasNotes } from "~/lib/actions/canvas";
 import { useWebSocket } from "~/lib/hooks/use-web-socket";
+import { findOptimalNotePosition, getNextNoteId } from "~/lib/utils/note-placement";
 
 const GRID_SIZE = 20;
 const CANVAS_SIZE = 3000;
@@ -290,10 +291,6 @@ export default function Canvas({
     };
   }, [notes, debouncedSave]);
 
-  const getNextNoteId = () => {
-    return Math.max(...notes.map(n => n.id), 0) + 1;
-  };
-
   const startEditing = (id: number) => {
     setEditingNoteId(id);
     setTimeout(() => {
@@ -305,18 +302,18 @@ export default function Canvas({
   };
 
   const addNewNote = () => {
-    const newId = getNextNoteId();
+    const newId = getNextNoteId(notes);
+    const position = findOptimalNotePosition(notes, 20, 20); // width: 15, height: 10
     const newZIndex = maxZIndex + 1;
     setMaxZIndex(newZIndex);
+
+    const randomSize = () => Math.floor(Math.random() * 6) + 15; // 15-20 inclusive
 
     const newNote: Note = {
       id: newId,
       content: "# New Note\n\nClick to edit...",
-      position: {
-        x: CANVAS_SIZE / (2 * GRID_SIZE) - 10,
-        y: CANVAS_SIZE / (2 * GRID_SIZE) - 10,
-      },
-      size: { width: 15, height: 10 },
+      position,
+      size: { width: randomSize(), height: randomSize() },
       zIndex: newZIndex,
     };
 

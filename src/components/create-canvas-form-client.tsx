@@ -46,7 +46,7 @@ export default function CreateCanvasFormClient({ onCanvasCreated }: CreateCanvas
     setIsOpen(false);
     toast.success(`Canvas "${canvas.name}" created successfully!`);
     onCanvasCreated?.();
-    redirect(`/canvas/${canvas.id}`);
+    redirect(`/dashboard/canvas/${canvas.id}`);
   }
 
   // Handle error
